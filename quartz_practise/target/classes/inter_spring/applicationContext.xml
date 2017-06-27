@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="jobDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="jobClass" value="inter_spring.TestJob"></property>
+        <!-- 必须设置为true,如果为false,当没有活动的触发器与之关联时会在调度器中删除改任务 -->
+        <property name="durability" value="true"></property>
+        <property name="name" value="myjob1"/>
+        <property name="group" value="mygroup1"/>
+        <!-- 指定spring容器的key，如果不设定，在job中的jobmap中是获取不到spring容器的 -->
+        <property name="applicationContextJobDataKey" value="applicationContext"/>
+    </bean>
+
+    <bean id="simpleTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+        <property name="jobDetail" ref="jobDetail" />
+        <property name="startDelay" value="3000" />
+        <property name="repeatInterval" value="2000" />
+    </bean>
+    
+    <bean id="cronTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+    	<property name="jobDetail" ref="jobDetail"/>
+    	<property name="cronExpression" value="0/5 * * * * ?"></property>
+    </bean>
+
+    <!-- 总管理类 如果将lazy-init='false'那么容器启动就会执行调度程序 -->
+    <bean id="startQuertz" lazy-init="false" autowire="no" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <!-- 管理trigger -->
+        <property name="triggers">
+            <list>
+               <!--  <ref bean="simpleTrigger" /> -->
+                <ref bean="cronTrigger"/>
+            </list>
+        </property>
+    </bean>
+</beans>
